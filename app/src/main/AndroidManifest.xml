@@ -26,6 +26,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.returnpath.supermailblasteralpha.MainActivity" />
         </activity>
+        <activity
+            android:name=".LoadData"
+            android:label="@string/title_activity_load_data" >
+        </activity>
     </application>
 
 </manifest>

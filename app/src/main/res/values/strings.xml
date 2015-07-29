@@ -4,5 +4,12 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="start_button">Let\'s Go!</string>
+    <string name="settings_button">Settings</string>
     <string name="title">SUPER Mail Blaster Alpha</string>
+
+    <string name="title_activity_fullscreen">FullscreenActivity</string>
+    <string name="title_activity_load_data">LoadData</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 </resources>
