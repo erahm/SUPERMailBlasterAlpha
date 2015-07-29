@@ -7,6 +7,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:1.2.3'
         classpath 'org.codehaus.groovy:gradle-groovy-android-plugin:0.3.6'
+        classpath 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
     }
 }
 
@@ -38,4 +39,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.android.support:support-v4:22.2.1'
     compile 'org.codehaus.groovy:groovy:2.4.3:grooid'
+    compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
 }
