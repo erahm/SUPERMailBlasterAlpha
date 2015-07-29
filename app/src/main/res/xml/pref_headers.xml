@@ -3,15 +3,7 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="com.returnpath.supermailblasteralpha.SettingsActivity$GeneralPreferenceFragment"
-        android:title="@string/pref_header_general" />
-
-    <header
-        android:fragment="com.returnpath.supermailblasteralpha.SettingsActivity$NotificationPreferenceFragment"
-        android:title="@string/pref_header_notifications" />
-
-    <header
-        android:fragment="com.returnpath.supermailblasteralpha.SettingsActivity$DataSyncPreferenceFragment"
-        android:title="@string/pref_header_data_sync" />
+        android:fragment="com.returnpath.supermailblasteralpha.SettingsActivity$ContextIOPreferenceFragment"
+        android:title="@string/pref_header_contextio" />
 
 </preference-headers>
