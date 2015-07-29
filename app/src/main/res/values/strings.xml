@@ -3,4 +3,12 @@
 
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="start_button">Let\'s Go!</string>
+    <string name="title">SUPER Mail Blaster Alpha</string>
+
+    //Preferences strings
+    <string name="setting_email">Enter email address</string>
+    <string name="setting_sync_quantity">How many emails would you like to sync?</string>
+    <string name="setting_target_folder">Which folder would you like to shoot messages from?</string>
+    <string name="setting_love_it">I am loving this!</string>
 </resources>
