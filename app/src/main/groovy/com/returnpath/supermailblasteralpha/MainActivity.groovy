@@ -167,8 +167,6 @@ public class MainActivity extends Activity {
      */
     public void goToSettings(View view) {
         Intent intent = new Intent(this, SettingsActivity.class);
-        //EditText = (EditText) findViewById(R.id.edit_message); // recommended by tutorial
-        //EditText = (EditText) findViewById(R.id.edit_query); // only thing in auto-complete
-        Preference pref1 = new Preference()
+        startActivity(intent);
     }
 }
