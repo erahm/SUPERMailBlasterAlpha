@@ -11,4 +11,5 @@
     <string name="setting_sync_quantity">How many emails would you like to sync?</string>
     <string name="setting_target_folder">Which folder would you like to shoot messages from?</string>
     <string name="setting_love_it">I am loving this!</string>
+    <string name="graphics_button_text">Graphics!</string>
 </resources>

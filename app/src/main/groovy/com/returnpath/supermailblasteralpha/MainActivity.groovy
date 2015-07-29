@@ -1,19 +1,14 @@
-package com.returnpath.supermailblasteralpha;
-
-import com.returnpath.supermailblasteralpha.util.SystemUiHider;
-
-import android.annotation.TargetApi;
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
-import android.preference.Preference;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.EditText;
-
-
+package com.returnpath.supermailblasteralpha
+import android.annotation.TargetApi
+import android.app.Activity
+import android.content.Intent
+import android.os.Build
+import android.os.Bundle
+import android.os.Handler
+import android.preference.Preference
+import android.view.MotionEvent
+import android.view.View
+import com.returnpath.supermailblasteralpha.util.SystemUiHider
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
@@ -170,5 +165,14 @@ public class MainActivity extends Activity {
         //EditText = (EditText) findViewById(R.id.edit_message); // recommended by tutorial
         //EditText = (EditText) findViewById(R.id.edit_query); // only thing in auto-complete
         Preference pref1 = new Preference()
+    }
+
+    /**
+     * Called when the 'Graphics!' button is clicked: graphics_button
+     * @param view
+     */
+    public void goToGraphics(View view) {
+        Intent intent = new Intent(this, OpenGLES20Activity);
+        Preference pref1 = new Preference();
     }
 }
