@@ -4,11 +4,14 @@ import com.returnpath.supermailblasteralpha.util.SystemUiHider;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.Preference;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.EditText;
 
 
 /**
@@ -156,5 +159,16 @@ public class MainActivity extends Activity {
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+
+    /**
+     * Called when button is clicked: start_button
+     * @param view
+     */
+    public void goToSettings(View view) {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        //EditText = (EditText) findViewById(R.id.edit_message); // recommended by tutorial
+        //EditText = (EditText) findViewById(R.id.edit_query); // only thing in auto-complete
+        Preference pref1 = new Preference()
     }
 }
