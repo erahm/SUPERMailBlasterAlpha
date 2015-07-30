@@ -26,6 +26,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.returnpath.supermailblasteralpha.MainActivity" />
         </activity>
+        <activity
+            android:name=".OpenGLES20Activity"
+            android:label="OpenGLES20"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.returnpath.supermailblasteralpha.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

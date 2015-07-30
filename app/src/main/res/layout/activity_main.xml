@@ -42,6 +42,13 @@
                 android:text="@string/start_button"
                 android:onClick="goToSettings"/>
 
+            <Button android:id="@+id/graphics_button" style="?metaButtonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/graphics_button_text"
+                android:onClick="goToGraphics"/>
+
         </LinearLayout>
     </FrameLayout>
 
