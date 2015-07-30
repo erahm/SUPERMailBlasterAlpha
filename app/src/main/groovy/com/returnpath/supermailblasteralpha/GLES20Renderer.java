@@ -5,120 +5,71 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class GLES20Renderer implements GLSurfaceView.Renderer {
 
-    // The locations of the corners (vertices) of our triangles.
-    private final FloatBuffer mTriVerts1;
-    private final FloatBuffer mTriVerts2;
-    private final FloatBuffer mTriVerts3;
-    // Floats are 32 bits --> 4 bytes. This value should never need to change.
-    private final int mBytesPerFloat = 4;
-    // The 'stride' is the distance between two consecutive values of
-    // consecutive vertices. Since we store 7 floats for each vertex,
-    // (x, y, z, r, g, b, and a) there are 7 * sizeof(float) bytes between
-    // the nth vertex's, say, x coord and the (n+1)th's x coord.
-    private final int mStrideBytes = 7 * mBytesPerFloat;
-    // This matrix is used to move models from object space to world space.
-    private float[] mModelMatrix = new float[16];
     // This matrix represents the location of our camera and where it looks.
     private float[] mViewMatrix = new float[16];
+
     // This matrix is used to 'flatten' our world into camera space.
     // When we're doing things on a 2D grid, this isn't going to be
     // very fancy.
     private float[] mProjMatrix = new float[16];
+
     // This is the final combined matrix that shaders actually want.
     private float[] mMVPMatrix = new float[16];
     private int mMVPMatrixHandle;
+
     // These handles represent buffers within OpenGL for their respective
     // values of the vertices.
     private int mPositionHandle;
-    // Since position comes first, the offset is 0.
-    private int mPositionOffset = 0;
-    // The number of pieces of position data, measured in elements (not bytes).
-    // We have x, y, and z --> 3 data.
-    private int mPositionDataSize = 3;
+
     // Same as above, but for color.
     private int mColorHandle;
-    // Our data looks like this: x, y, z, r, g, b, a
-    // So we see color starts at offset 3. (Remember, 0-indexed)
-    private int mColorOffset = 3;
-    // r, g, b, and a.
-    private int mColorDataSize = 4;
     private float windowWidth = 0;
     private float windowHeight = 0;
 
-    public GLES20Renderer() {
+    private SimpleTriangle mTri;
+    private SimpleTriangle mTri2;
+    private float mLastUpdate = 0.0f;
 
-        // This triangle is red, green, and blue.
-        final float[] triangle1VerticesData = {
+    public GLES20Renderer() {
+        final float[] data = {
                 // X, Y, Z,
                 // R, G, B, A
                 -0.5f, -0.25f, 0.0f,
                 1.0f, 0.0f, 0.0f, 1.0f,
 
                 0.5f, -0.25f, 0.0f,
-                0.0f, 0.0f, 1.0f, 1.0f,
+                0.0f, 1.0f, 0.0f, 1.0f,
 
                 0.0f, 0.559016994f, 0.0f,
-                0.0f, 1.0f, 0.0f, 1.0f
+                0.0f, 0.0f, 1.0f, 1.0f
         };
 
-        // This triangle is yellow, cyan, and magenta.
-        final float[] triangle2VerticesData = {
-                // X, Y, Z,
-                // R, G, B, A
-                -0.5f, -0.25f, 0.0f,
-                1.0f, 1.0f, 0.0f, 1.0f,
+        mTri = new SimpleTriangle(data);
+        mTri.scale(150.f);
 
-                0.5f, -0.25f, 0.0f,
+        mTri2 = new SimpleTriangle(new float[]{
+                // x, y, z
+                // r, g, b, a
+                -0.5f, -0.25f, 0.0f,
                 0.0f, 1.0f, 1.0f, 1.0f,
 
-                0.0f, 0.559016994f, 0.0f,
-                1.0f, 0.0f, 1.0f, 1.0f
-        };
-
-        // This triangle is white, gray, and black.
-        final float[] triangle3VerticesData = {
-                // X, Y, Z,
-                // R, G, B, A
-                -0.5f, -0.25f, 0.0f,
-                1.0f, 1.0f, 1.0f, 1.0f,
-
                 0.5f, -0.25f, 0.0f,
-                0.5f, 0.5f, 0.5f, 1.0f,
+                1.0f, 0.0f, 1.0f, 1.0f,
 
                 0.0f, 0.559016994f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-        };
-
-        // Setup the ByteBuffers to be as long as we need them.
-        mTriVerts1 = ByteBuffer.allocateDirect(triangle1VerticesData.length * mBytesPerFloat)
-            .order(ByteOrder.nativeOrder())
-            .asFloatBuffer();
-        // Then copy over the bytes and reset the ByteBuffer's position to the beginning.
-        mTriVerts1.put(triangle1VerticesData).position(0);
-
-        // ... and repeat!
-        mTriVerts2 = ByteBuffer.allocateDirect(triangle1VerticesData.length * mBytesPerFloat)
-            .order(ByteOrder.nativeOrder())
-            .asFloatBuffer();
-        mTriVerts2.put(triangle2VerticesData).position(0);
-
-        // ... and again!
-        mTriVerts3 = ByteBuffer.allocateDirect(triangle1VerticesData.length * mBytesPerFloat)
-            .order(ByteOrder.nativeOrder())
-            .asFloatBuffer();
-        mTriVerts3.put(triangle3VerticesData).position(0);
+                1.0f, 1.0f, 0.0f, 1.0f
+        });
+        mTri2.shift(-100.0f, -200.0f);
+        // Scaling needs to come last!
+        mTri2.scale(200.0f);
     }
 
-    public static int makeShader(String src, int type) {
+    private static int makeShader(String src, int type) {
         int handle = GLES20.glCreateShader(type);
         if (handle == 0) {
             // Something bad has happened. Shit shit fire our shit!
@@ -233,6 +184,7 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         GLES20.glViewport(0, 0, width, height);
 
         Matrix.orthoM(mProjMatrix, 0,
+                //-10.0f, 10.0f, -10.0f, 10.0f,
                 -windowWidth / 2.0f, windowWidth / 2.0f,
                 -windowHeight / 2.0f, windowHeight / 2.0f,
                 -1.0f, 1.0f);
@@ -243,52 +195,16 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
         // Animations run more smoothly when they're based off of time, not frames.
-        long time = SystemClock.uptimeMillis();
-        float angleDeg = (360.0f / 10000.0f) * (float)time;
+        float time = SystemClock.uptimeMillis() / 1000.0f;
+        float dTime = time - mLastUpdate;
 
-        float scaling = 200.0f;
-        float offsetRatio = 0.3f;
+        // This is roughly degrees per second.
+        mTri.rotate(dTime * 201.0f);
+        mTri.draw(mViewMatrix, mProjMatrix, mMVPMatrix, mMVPMatrixHandle, mPositionHandle, mColorHandle);
 
-        // Reset the model matrix before drawing each triangle.
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.scaleM(mModelMatrix, 0, scaling, scaling, scaling);
-        Matrix.rotateM(mModelMatrix, 0, angleDeg, 0.0f, 0.0f, 1.0f);
-        drawTriangle(mTriVerts1);
+        mTri2.rotate(dTime * 37.0f);
+        mTri2.draw(mViewMatrix, mProjMatrix, mMVPMatrix, mMVPMatrixHandle, mPositionHandle, mColorHandle);
 
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 1.0f, offsetRatio * windowHeight, 0.0f);
-        Matrix.rotateM(mModelMatrix, 0, 1.1f * angleDeg, 0.0f, 0.0f, 1.0f);
-        Matrix.scaleM(mModelMatrix, 0, scaling, scaling, scaling);
-        drawTriangle(mTriVerts2);
-
-        Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.translateM(mModelMatrix, 0, 0.0f, -offsetRatio * windowHeight, 0.0f);
-        Matrix.rotateM(mModelMatrix, 0, 1.2f * angleDeg, 0.0f, 0.0f, 1.0f);
-        Matrix.scaleM(mModelMatrix, 0, scaling, scaling, scaling);
-        drawTriangle(mTriVerts3);
-    }
-
-    private void drawTriangle(final FloatBuffer triBuf) {
-        triBuf.position(mPositionOffset);
-
-        // Setup a_Position data.
-        GLES20.glVertexAttribPointer(mPositionHandle, mPositionDataSize,
-                GLES20.GL_FLOAT, false, mStrideBytes, triBuf);
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
-
-        // Setup a_Color data.
-        triBuf.position(mColorOffset);
-        GLES20.glVertexAttribPointer(mColorHandle, mColorDataSize,
-                GLES20.GL_FLOAT, false, mStrideBytes, triBuf);
-        GLES20.glEnableVertexAttribArray(mColorHandle);
-
-        Matrix.multiplyMM(mMVPMatrix, 0, mViewMatrix, 0, mModelMatrix, 0);
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVPMatrix, 0);
-
-        // Tell OpenGL about the matrix we've been saving up.
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-
-        // This is it. This is what draws our stuff!
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+        mLastUpdate = time;
     }
 }
