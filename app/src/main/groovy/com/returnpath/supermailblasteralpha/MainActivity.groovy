@@ -181,13 +181,4 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(this, LoadData);
         startActivity(intent);
     }
-
-    /**
-     * Called when start_button is clicked
-     * @param view
-     */
-    public void goToGame(View view) {
-        Intent intent = new Intent(this, LoadData.class);
-        startActivity(intent);
-    }
 }
