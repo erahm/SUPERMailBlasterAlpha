@@ -27,8 +27,8 @@
                 android:value="com.returnpath.supermailblasteralpha.MainActivity" />
         </activity>
         <activity
-            android:name=".OpenGLES20Activity"
-            android:label="OpenGLES20"
+            android:name=".GameActivity"
+            android:label="ImNotSureWhatThisLabelIsForSomeoneHelp"
             android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
