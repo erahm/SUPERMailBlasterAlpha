@@ -19,7 +19,7 @@ public class MainActivity extends Activity {
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
      */
-    private static final boolean AUTO_HIDE = true;
+    private static final boolean AUTO_HIDE = false;
 
     /**
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
@@ -109,7 +109,7 @@ public class MainActivity extends Activity {
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        findViewById(R.id.start_button).setOnTouchListener(mDelayHideTouchListener);
     }
 
     @Override
@@ -156,11 +156,11 @@ public class MainActivity extends Activity {
     }
 
     /**
-     * Called when button is clicked: start_button
+     * Called when settings_button is clicked
      * @param view
      */
     public void goToSettings(View view) {
-        Intent intent = new Intent(this, SettingsActivity.class);
+        Intent intent = new Intent(this, SettingsActivity);
         startActivity(intent);
     }
 
@@ -170,6 +170,15 @@ public class MainActivity extends Activity {
      */
     public void goToGraphics(View view) {
         Intent intent = new Intent(this, GameActivity);
+        startActivity(intent);
+    }
+
+    /**
+     * Called when start_button is clicked
+     * @param view
+     */
+    public void goToGame(View view) {
+        Intent intent = new Intent(this, LoadData);
         startActivity(intent);
     }
 }
