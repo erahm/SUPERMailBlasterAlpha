@@ -28,6 +28,7 @@ public class GameActivity extends Activity {
 
         if (conf.reqGlEsVersion >= 0x20000) {
             surfaceView.setEGLContextClientVersion(2);
+            surfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
             surfaceView.setRenderer(new GLES20Renderer());
             System.out.println("Using OpenGL ES 2.0 backend.");
         } else {
