@@ -173,6 +173,6 @@ public class MainActivity extends Activity {
      */
     public void goToGraphics(View view) {
         Intent intent = new Intent(this, OpenGLES20Activity);
-        Preference pref1 = new Preference();
+        startActivity(intent);
     }
 }
