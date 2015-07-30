@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-public class SimpleTriangle {
+public class VertexGroup {
     // Since position comes first, the offset is 0.
     final private int mPositionOffset = 0;
 
@@ -30,12 +30,12 @@ public class SimpleTriangle {
 
     private FloatBuffer mBuf;
 
-    private float[] mModel = new float[16];
+    private float[] mModelMatrix = new float[16];
 
     // This constructor expects an array of 'packed' data. It should be
     // an array where the first 7 indices correspond to x, y, z, r, g, b, and a for the first vertex. The next 7 for the second, etc.
-    public SimpleTriangle(float[] packed) {
-        Matrix.setIdentityM(mModel, 0);
+    public VertexGroup(float[] packed) {
+        Matrix.setIdentityM(mModelMatrix, 0);
         mBuf = ByteBuffer.allocateDirect(packed.length * 4)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer();
@@ -44,19 +44,19 @@ public class SimpleTriangle {
     }
 
     public void scale(float factor) {
-        Matrix.scaleM(mModel, 0, factor, factor, factor);
+        Matrix.scaleM(mModelMatrix, 0, factor, factor, factor);
     }
 
     public void shift(float dx, float dy) {
-        Matrix.translateM(mModel, 0, dx, dy, 0.0f);
+        Matrix.translateM(mModelMatrix, 0, dx, dy, 0.0f);
     }
 
     // Rotate the object. Positive is counter-clockwise. (I think)
     public void rotate(float dtheta) {
-        Matrix.rotateM(mModel, 0, dtheta, 0.0f, 0.0f, 1.0f);
+        Matrix.rotateM(mModelMatrix, 0, dtheta, 0.0f, 0.0f, 1.0f);
     }
 
-    public void draw(float[] viewMatrix, float[] projMatrix, float[] mvpMatrix, int mvpHandle, int posHandle, int colorHandle) {
+    public void draw(float[] mvpMatrix, int mvpHandle, int posHandle, int colorHandle) {
         mBuf.position(mPositionOffset);
 
         // Setup a_Position data.
@@ -70,13 +70,17 @@ public class SimpleTriangle {
                 GLES20.GL_FLOAT, false, mStrideBytes, mBuf);
         GLES20.glEnableVertexAttribArray(colorHandle);
 
-        Matrix.multiplyMM(mvpMatrix, 0, viewMatrix, 0, mModel, 0);
-        Matrix.multiplyMM(mvpMatrix, 0, projMatrix, 0, mvpMatrix, 0);
+        float[] local = new float[16];
+        Matrix.multiplyMM(local, 0, mvpMatrix, 0, mModelMatrix, 0);
 
         // Tell OpenGL about the matrix we've been saving up.
-        GLES20.glUniformMatrix4fv(mvpHandle, 1, false, mvpMatrix, 0);
+        GLES20.glUniformMatrix4fv(mvpHandle, 1, false, local, 0);
+
+        // OpenGL needs to know how many vertices we're drawing.
+        mBuf.position(0);
+        final int verts = mBuf.remaining() / (mStrideBytes / 4);
 
         // This is it. This is what draws our stuff!
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, verts);
     }
 }

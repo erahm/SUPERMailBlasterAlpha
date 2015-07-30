@@ -5,6 +5,8 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
 
+import java.util.ArrayList;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -19,7 +21,7 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
     private float[] mProjMatrix = new float[16];
 
     // This is the final combined matrix that shaders actually want.
-    private float[] mMVPMatrix = new float[16];
+    private float[] mVPMatrix = new float[16];
     private int mMVPMatrixHandle;
 
     // These handles represent buffers within OpenGL for their respective
@@ -31,12 +33,15 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
     private float windowWidth = 0;
     private float windowHeight = 0;
 
-    private SimpleTriangle mTri;
-    private SimpleTriangle mTri2;
+    private VertexGroup mTri;
+    private VertexGroup mTri2;
+    private ArrayList<VertexGroup> shapes = new ArrayList<VertexGroup>();
+
     private float mLastUpdate = 0.0f;
 
     public GLES20Renderer() {
-        final float[] data = {
+        // Two triangles.
+        shapes.add(new VertexGroup(new float[]{
                 // X, Y, Z,
                 // R, G, B, A
                 -0.5f, -0.25f, 0.0f,
@@ -47,12 +52,10 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
 
                 0.0f, 0.559016994f, 0.0f,
                 0.0f, 0.0f, 1.0f, 1.0f
-        };
+        }));
+        shapes.get(0).scale(150.f);
 
-        mTri = new SimpleTriangle(data);
-        mTri.scale(150.f);
-
-        mTri2 = new SimpleTriangle(new float[]{
+        shapes.add(new VertexGroup(new float[]{
                 // x, y, z
                 // r, g, b, a
                 -0.5f, -0.25f, 0.0f,
@@ -63,10 +66,26 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
 
                 0.0f, 0.559016994f, 0.0f,
                 1.0f, 1.0f, 0.0f, 1.0f
-        });
-        mTri2.shift(-100.0f, -200.0f);
+        }));
+        shapes.get(1).shift(-200.0f, -100.0f);
         // Scaling needs to come last!
-        mTri2.scale(200.0f);
+        shapes.get(1).scale(200.0f);
+
+        // A simple square.
+        shapes.add(new VertexGroup(new float[]{
+                -0.5f, -0.5f, 0.0f,
+                1.0f, 0.0f, 1.0f, 1.0f,
+
+                -0.5f, 0.5f, 0.0f,
+                1.0f, 0.0f, 1.0f, 1.0f,
+
+                0.5f, -0.5f, 0.0f,
+                1.0f, 0.0f, 1.0f, 1.0f,
+
+                0.5f, 0.5f, 0.0f,
+                1.0f, 0.0f, 1.0f, 1.0f,
+        }));
+        shapes.get(2).scale(100.0f);
     }
 
     private static int makeShader(String src, int type) {
@@ -181,13 +200,16 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         windowWidth = width;
         windowHeight = height;
 
+        // Whenever the view changes, update the matrices to avoid distorting our screen.
+        // If we don't update them, the screen stretches from the old resolution to the new one.
         GLES20.glViewport(0, 0, width, height);
 
         Matrix.orthoM(mProjMatrix, 0,
-                //-10.0f, 10.0f, -10.0f, 10.0f,
                 -windowWidth / 2.0f, windowWidth / 2.0f,
                 -windowHeight / 2.0f, windowHeight / 2.0f,
                 -1.0f, 1.0f);
+
+        Matrix.multiplyMM(mVPMatrix, 0, mProjMatrix, 0, mViewMatrix, 0);
     }
 
     @Override
@@ -198,13 +220,18 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         float time = SystemClock.uptimeMillis() / 1000.0f;
         float dTime = time - mLastUpdate;
 
-        // This is roughly degrees per second.
-        mTri.rotate(dTime * 201.0f);
-        mTri.draw(mViewMatrix, mProjMatrix, mMVPMatrix, mMVPMatrixHandle, mPositionHandle, mColorHandle);
+        // These are degrees per second. Or at least they should be.
+        float[] speeds = {201.0f, -37.0f, 371.0f};
+        int idx = 0;
 
-        mTri2.rotate(dTime * 37.0f);
-        mTri2.draw(mViewMatrix, mProjMatrix, mMVPMatrix, mMVPMatrixHandle, mPositionHandle, mColorHandle);
+        for (VertexGroup tri : shapes) {
+            float speed = speeds[idx % speeds.length];
+            tri.rotate(dTime * speed);
+            tri.draw(mVPMatrix, mMVPMatrixHandle, mPositionHandle, mColorHandle);
+            idx += 1;
+        }
 
         mLastUpdate = time;
     }
+
 }
