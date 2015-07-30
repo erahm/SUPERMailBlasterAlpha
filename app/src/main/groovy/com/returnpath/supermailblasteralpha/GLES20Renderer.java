@@ -115,13 +115,13 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
 
         // ... and repeat!
         mTriVerts2 = ByteBuffer.allocateDirect(triangle1VerticesData.length * mBytesPerFloat)
-                .order(ByteOrder.nativeOrder())
+            .order(ByteOrder.nativeOrder())
             .asFloatBuffer();
         mTriVerts2.put(triangle2VerticesData).position(0);
 
         // ... and again!
         mTriVerts3 = ByteBuffer.allocateDirect(triangle1VerticesData.length * mBytesPerFloat)
-                .order(ByteOrder.nativeOrder())
+            .order(ByteOrder.nativeOrder())
             .asFloatBuffer();
         mTriVerts3.put(triangle3VerticesData).position(0);
     }
@@ -173,8 +173,6 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
                 + "   gl_FragColor = v_Color;     \n" // Pass the color directly through the pipeline.
                 + "}                              \n";
 
-
-
         int vert = makeShader(vertSrc, GLES20.GL_VERTEX_SHADER);
         int frag = makeShader(fragSrc, GLES20.GL_FRAGMENT_SHADER);
 
@@ -208,7 +206,7 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         mColorHandle = GLES20.glGetAttribLocation(program, "a_Color");
 
         // Everything worked! Tell OpenGL to use this 'program' to render.
-        // TODO: We might want save this program, incase we ever want to switch them.
+        // TODO: We might want save this program, in case we ever want to switch them.
         GLES20.glUseProgram(program);
     }
 
@@ -226,9 +224,7 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
 
         // This defines the region which we want to render in.
         // Anything not in this shape (a 'frustum') will not render.
-        Matrix.frustumM(mProjMatrix, 0,
-                left, right, bottom, top,
-                near, far);
+        Matrix.frustumM(mProjMatrix, 0, left, right, bottom, top, near, far);
     }
 
     @Override

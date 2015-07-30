@@ -16,17 +16,16 @@ public class OpenGLES20Activity extends Activity {
 
         surfaceView = new GLSurfaceView(this);
 
-        ActivityManager actman = (ActivityManager)getSystemService(
-                Context.ACTIVITY_SERVICE
-        );
+        ActivityManager actman = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
         ConfigurationInfo conf = actman.getDeviceConfigurationInfo();
 
         if (conf.reqGlEsVersion >= 0x20000) {
             surfaceView.setEGLContextClientVersion(2);
             surfaceView.setRenderer(new GLES20Renderer());
+            System.out.println("Using OpenGL ES 2.0 backend.");
         } else {
-            // We don't support OpenGL ES 2.0. This is "very bad" and
-            // completely "unrecoverable".
+            // This is "very bad" and "completely unrecoverable".
+            System.out.println("OpenGL ES 2.0 not supported.");
             return;
         }
 
