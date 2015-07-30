@@ -169,7 +169,7 @@ public class MainActivity extends Activity {
      * @param view
      */
     public void goToGraphics(View view) {
-        Intent intent = new Intent(this, OpenGLES20Activity);
+        Intent intent = new Intent(this, GameActivity);
         startActivity(intent);
     }
 }
