@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.preference.Preference
 import android.view.MotionEvent
 import android.view.View
 import com.returnpath.supermailblasteralpha.util.SystemUiHider
@@ -162,9 +161,7 @@ public class MainActivity extends Activity {
      */
     public void goToSettings(View view) {
         Intent intent = new Intent(this, SettingsActivity.class);
-        //EditText = (EditText) findViewById(R.id.edit_message); // recommended by tutorial
-        //EditText = (EditText) findViewById(R.id.edit_query); // only thing in auto-complete
-        Preference pref1 = new Preference()
+        startActivity(intent);
     }
 
     /**
