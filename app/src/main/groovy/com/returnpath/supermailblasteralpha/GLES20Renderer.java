@@ -6,6 +6,7 @@ import android.opengl.Matrix;
 import android.os.SystemClock;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -34,37 +35,9 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
     // Time since something last updated.
     private float mLastUpdate = 0.0f;
 
-    private ArrayList<VertexGroup> shapes = new ArrayList<VertexGroup>();
+    private ArrayList<VertexGroup> invaders = new ArrayList<VertexGroup>();
     private int mColorHandle;
     private boolean mShapesNeedLoading = true;
-
-    public GLES20Renderer() {
-        // A  triangle, made with hard coded points.
-        float scale = 200.0f;
-        VertexGroup triangle = new VertexGroup(new float[]{
-                // x, y, z
-                -0.5f * scale, -0.25f * scale, 0.0f,
-                +0.5f * scale, -0.25f * scale, 0.0f,
-                +0.0f * scale, +0.56f * scale, 0.0f
-        });
-        triangle.shift(-200.0f, -100.0f)
-                .color((float) Math.random(), (float) Math.random(), (float) Math.random());
-
-        // A wide rectangle, made with easier-to-use method calls.
-        VertexGroup rect = VertexGroup
-                // The 0.5f here means this is drawn above the other shapes, which default to 0.
-                .makeRect(500.0f, 100.0f, 0.5f)
-                .color(0.1f, 0.7f, 1.0f)
-                .center(-150.0f, 150.0f);
-
-        VertexGroup square = VertexGroup
-                .makeRect(50.0f, 50.0f, 0.8f)
-                .color((float) Math.random(), (float) Math.random(), (float) Math.random());
-
-        shapes.add(triangle);
-        shapes.add(rect);
-        shapes.add(square);
-    }
 
     private static int makeShader(String src, int type) {
         int handle = GLES20.glCreateShader(type);
@@ -90,8 +63,8 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         return handle;
     }
 
-    public void clearShapes() {
-        shapes = new ArrayList<VertexGroup>();
+    public void clearInvaders() {
+        invaders = new ArrayList<VertexGroup>();
     }
 
     @Override
@@ -181,15 +154,10 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         windowWidth = width;
         windowHeight = height;
 
-        // We postpone loading the shapes because we want them to scale to the size of the screen,
+        // We postpone loading the invaders because we want them to scale to the size of the screen,
         // which we don't have until here.
         if (mShapesNeedLoading) {
-            // A square which is sized at 30% of the smallest window dimension.
-            float side = 0.3f * Math.min(windowHeight, windowWidth);
-            shapes.add(VertexGroup
-                            .makeRect(side, side)
-                            .color((float) Math.random(), (float) Math.random(), (float) Math.random())
-            );
+            initializeInvaderGrid();
             mShapesNeedLoading = false;
         }
 
@@ -210,20 +178,69 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
         // Animations run more smoothly when they're based off of time, not frames.
-        float time = SystemClock.uptimeMillis() / 1000.0f;
-        float dTime = time - mLastUpdate;
+        final float time = SystemClock.uptimeMillis() / 1000.0f;
+        final float dTime = time - mLastUpdate;
 
-        float[] radii = {100.0f, 50.0f, 300.0f};
-        int[] direction = {-1, 1};
+        // Skip the first frame, instead using it as our starting point for time-based animations.
+        if (mLastUpdate == 0) {
+            mLastUpdate = time;
+            return;
+        }
 
-        for (int i = 0; i < shapes.size(); i += 1) {
-            float r = radii[i % radii.length];
-            float d = direction[i % 2];
-            shapes.get(i).center(r * (float) Math.cos(d * time), r * (float) Math.sin(d * time));
-            shapes.get(i).draw(mVPMatrix, mMVPMatrixHandle, mPositionHandle, mColorHandle);
+        // Inch the invaders down. It should take about 30 seconds for a row to cross the screen.
+        final float dyInvader = dTime * -windowHeight / 30;
+        for (int i = 0; i < invaders.size(); i += 1) {
+            VertexGroup invader = invaders.get(i);
+            if (invader == null) {
+                continue;
+            }
+            invader.shift(0, dyInvader);
+
+            // This isn't quite right. It will trigger when the center passes through the
+            // bottom of the screen, not the trailing edge. If you watch it closely,
+            // you'll see them removed early.
+            if (invader.centerY() < -windowHeight / 2) {
+                System.out.println("An alien broke through!");
+                invaders.set(i, null);
+                continue;
+            }
+
+            invader.draw(mVPMatrix, mMVPMatrixHandle, mPositionHandle, mColorHandle);
+        }
+
+        // Every frame, randomly kill off an invader. Since this happens every frame, it needs
+        // to be unlikely enough that they live more than a half second.
+        // This is mostly a demonstration that we can remove them.
+        if (Math.random() < 0.01 && invaders.size() != 0) {
+            Random r = new Random();
+            int idx;
+            do {
+                idx = r.nextInt(invaders.size());
+            } while (invaders.get(idx) == null);
+            invaders.set(idx, null);
         }
 
         mLastUpdate = time;
+    }
+
+    private void initializeInvaderGrid() {
+        final int perRow = 15;
+        final int rows = 10;
+        float block = (1.0f / perRow) * Math.min(windowWidth, windowHeight);
+        float size = 0.8f * block;
+        float margin = 0.2f * block;
+
+        for (int i = 0; i < perRow; i += 1) {
+            for (int j = 0; j < rows; j += 1) {
+                VertexGroup invader = VertexGroup
+                        .makeRect(size, 0.3f * size)
+                        .color(0.0f, 1.0f, 0.0f)
+                        .center(i * (size + margin) - 0.25f * windowWidth,
+                                j * (size + margin) + 0.5f * windowHeight);
+                invaders.add(invader);
+            }
+        }
+
     }
 
 }
