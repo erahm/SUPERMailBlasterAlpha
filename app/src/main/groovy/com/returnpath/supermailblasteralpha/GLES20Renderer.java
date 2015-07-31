@@ -55,7 +55,7 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
                 // The 0.5f here means this is drawn above the other shapes, which default to 0.
                 .makeRect(100.0f, 500.0f, 0.5f)
                 .color(0.1f, 0.7f, 1.0f)
-                .shift(-150.0f, 150.0f);
+                .center(-150.0f, 150.0f);
 
         shapes.add(triangle);
         shapes.add(square);
@@ -85,9 +85,13 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         return handle;
     }
 
+    public void clearShapes() {
+        shapes = new ArrayList<VertexGroup>();
+    }
+
     @Override
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
-        GLES20.glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
+        GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
         Matrix.setLookAtM(mViewMatrix, 0, /* Offset */
             // Eye x, y, z
@@ -204,15 +208,8 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         float time = SystemClock.uptimeMillis() / 1000.0f;
         float dTime = time - mLastUpdate;
 
-        // These are degrees per second. Or at least they should be.
-        float[] speeds = {45.0f, -31.0f, 67.0f};
-        int idx = 0;
-
         for (VertexGroup tri : shapes) {
-            float speed = speeds[idx % speeds.length];
-            tri.rotate(dTime * speed);
             tri.draw(mVPMatrix, mMVPMatrixHandle, mPositionHandle, mColorHandle);
-            idx += 1;
         }
 
         mLastUpdate = time;
