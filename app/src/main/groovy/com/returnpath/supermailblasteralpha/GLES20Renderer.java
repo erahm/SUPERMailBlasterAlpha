@@ -4,6 +4,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.view.MotionEvent;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -36,6 +37,7 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
     private float mLastUpdate = 0.0f;
 
     private ArrayList<VertexGroup> invaders = new ArrayList<VertexGroup>();
+    private ArrayList<VertexGroup> bullets = new ArrayList<VertexGroup>();
     private int mColorHandle;
     private boolean mShapesNeedLoading = true;
 
@@ -72,11 +74,11 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
         Matrix.setLookAtM(mViewMatrix, 0, /* Offset */
-            // Eye x, y, z
+                // Eye x, y, z
                 0.0f,
                 0.0f,
                 1.0f,
-            // Look at x, y, z
+                // Look at x, y, z
                 0.0f,
                 0.0f,
                 0.0f,
@@ -96,7 +98,7 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
                         + "varying vec4 v_Color;          \n"
 
                         + "void main()                    \n"
-                + "{                              \n"
+                        + "{                              \n"
                         + "    v_Color = vec4(u_Color, 1.0); \n"
                         + "    gl_Position = u_MVPMatrix  \n"
                         + "               * a_Position;   \n"
@@ -108,9 +110,9 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
                         + "varying vec4 v_Color;          \n"
 
                         + "void main()                    \n"
-                + "{                              \n"
+                        + "{                              \n"
                         + "   gl_FragColor = v_Color;     \n"
-                + "}                              \n";
+                        + "}                              \n";
 
         int vert = makeShader(vertSrc, GLES20.GL_VERTEX_SHADER);
         int frag = makeShader(fragSrc, GLES20.GL_FRAGMENT_SHADER);
@@ -220,6 +222,20 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
             invaders.set(idx, null);
         }
 
+        // Update bullet positions
+        for (int i = 0; i < bullets.size(); i++) {
+            VertexGroup vg = bullets.get(i);
+            if (vg.centerY() > windowHeight / 2) {
+                // if bullet is out of frame, swap with last bullet in array
+                bullets.remove(i);
+                i -= 1;
+            }
+
+            vg.shift(0f, -10 * dyInvader);
+            vg.draw(mVPMatrix, mMVPMatrixHandle, mPositionHandle, mColorHandle);
+
+        }
+
         mLastUpdate = time;
     }
 
@@ -241,6 +257,16 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
             }
         }
 
+    }
+
+    // defines what happens when user taps the screen
+    public void touchAction(MotionEvent e) {
+
+        this.bullets.add(VertexGroup
+                .makeRect(15f, 15f, 0f)
+                .color(1f, 0.5f, 1f)
+                .shift(e.getX() - windowWidth / 2,
+                        -e.getY() + windowHeight / 2));
     }
 
 }
