@@ -6,12 +6,14 @@ import android.content.Context;
 import android.content.pm.ConfigurationInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 
 public class GameActivity extends Activity {
 
     private GLSurfaceView surfaceView;
+    private GLES20Renderer renderer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -29,7 +31,9 @@ public class GameActivity extends Activity {
         if (conf.reqGlEsVersion >= 0x20000) {
             surfaceView.setEGLContextClientVersion(2);
             surfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0);
-            surfaceView.setRenderer(new GLES20Renderer());
+            renderer = new GLES20Renderer();
+            surfaceView.setRenderer(renderer);
+
             System.out.println("Using OpenGL ES 2.0 backend.");
         } else {
             // This is "very bad" and "completely unrecoverable".
@@ -50,6 +54,19 @@ public class GameActivity extends Activity {
     protected void onPause() {
         super.onPause();
         surfaceView.onPause();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent e) {
+        float x = e.getX();
+        float y = e.getY();
+
+        // TEST: draw triangle where clicked
+        renderer.touchAction(e);
+        // check if touch overlaps with player/control box
+        // if it does, fire pixel in direction player is facing
+        surfaceView.requestRender();
+        return true;
     }
 
 }
