@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 
-
 import java.util.List;
 
 /**
@@ -39,6 +38,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(this.getLocalClassName(), "htoth: in onCreate");
         super.onCreate(savedInstanceState);
         setupActionBar();
     }
@@ -48,6 +48,7 @@ public class SettingsActivity extends PreferenceActivity {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     private void setupActionBar() {
+        Log.d(this.getLocalClassName(), "htoth: in setupActionBar");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // Show the Up button in the action bar.
             // TODO: Action bar is always NULL, don't know why.
@@ -61,6 +62,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(this.getLocalClassName(), "htoth: in onOptionsItemSelected");
         int id = item.getItemId();
         if (id == android.R.id.home) {
             // This ID represents the Home or Up button. In the case of this
@@ -80,6 +82,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
+        Log.d(this.getLocalClassName(), "htoth: in onPostCreate");
         super.onPostCreate(savedInstanceState);
 
         setupSimplePreferencesScreen();
@@ -91,6 +94,8 @@ public class SettingsActivity extends PreferenceActivity {
      * shown.
      */
     private void setupSimplePreferencesScreen() {
+        Log.d(this.getLocalClassName(), "htoth: in setupSimplePreferencesScreen");
+        Log.d("00", String.valueOf(isSimplePreferences(this)));
         if (!isSimplePreferences(this)) {
             return;
         }
@@ -115,6 +120,7 @@ public class SettingsActivity extends PreferenceActivity {
      * example, 10" tablets are extra-large.
      */
     private static boolean isXLargeTablet(Context context) {
+        Log.d("static SettingsActivity", "htoth: in isXLargeTablet");
         return (context.getResources().getConfiguration().screenLayout
                 & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
@@ -127,6 +133,7 @@ public class SettingsActivity extends PreferenceActivity {
      * "simplified" settings UI should be shown.
      */
     private static boolean isSimplePreferences(Context context) {
+        Log.d("static SettingsActivity", "htoth: in isSimplePreferences");
         return ALWAYS_SIMPLE_PREFS
                 || Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB
                 || !isXLargeTablet(context);
@@ -138,6 +145,7 @@ public class SettingsActivity extends PreferenceActivity {
     @Override
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void onBuildHeaders(List<Header> target) {
+        Log.d(this.getLocalClassName(), "htoth: in onBuildHeaders");
         if (!isSimplePreferences(this)) {
             loadHeadersFromResource(R.xml.pref_headers, target);
         }
@@ -151,7 +159,7 @@ public class SettingsActivity extends PreferenceActivity {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
-
+            Log.d("static SettingsActivity", "htoth: in Preference.OnPreferenceChangeListener");
             if (preference instanceof ListPreference) {
                 // For list preferences, look up the correct display value in
                 // the preference's 'entries' list.
@@ -182,6 +190,7 @@ public class SettingsActivity extends PreferenceActivity {
      * @see #sBindPreferenceSummaryToValueListener
      */
     private static void bindPreferenceSummaryToValue(Preference preference) {
+        Log.d("static SettingsActivity", "htoth: in bindPreferenceSummaryToValue");
         // Set the listener to watch for value changes.
         preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
 
@@ -201,6 +210,7 @@ public class SettingsActivity extends PreferenceActivity {
     public static class ContextIOPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
+            Log.d("static PrefFragment", "htoth: in ContextIOPreferenceFragment. onCreate");
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
 
