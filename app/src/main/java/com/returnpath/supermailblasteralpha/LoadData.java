@@ -49,6 +49,6 @@ public class LoadData extends ActionBarActivity {
 
 //        String testUrl = "https://api.context.io/2.0/accounts/55ba5f4ddfc24787518b4567/contacts/hyrum.toth%40returnpath.com";
         // TODO: pass in URL(s)
-        new ContextIOApi().execute();
+        new ContextIOApiHtoth().execute();
     }
 }
