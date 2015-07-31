@@ -28,64 +28,37 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
     // values of the vertices.
     private int mPositionHandle;
 
-    // Same as above, but for color.
-    private int mColorHandle;
     private float windowWidth = 0;
     private float windowHeight = 0;
 
-    private VertexGroup mTri;
-    private VertexGroup mTri2;
-    private ArrayList<VertexGroup> shapes = new ArrayList<VertexGroup>();
-
+    // Time since something last updated.
     private float mLastUpdate = 0.0f;
 
+    private ArrayList<VertexGroup> shapes = new ArrayList<VertexGroup>();
+    private int mColorHandle;
+    private boolean mShapesNeedLoading = true;
+
     public GLES20Renderer() {
-        // Two triangles.
-        shapes.add(new VertexGroup(new float[]{
-                // X, Y, Z,
-                // R, G, B, A
-                -0.5f, -0.25f, 0.0f,
-                1.0f, 0.0f, 0.0f, 1.0f,
-
-                0.5f, -0.25f, 0.0f,
-                0.0f, 1.0f, 0.0f, 1.0f,
-
-                0.0f, 0.559016994f, 0.0f,
-                0.0f, 0.0f, 1.0f, 1.0f
-        }));
-        shapes.get(0).scale(150.f);
-
-        shapes.add(new VertexGroup(new float[]{
+        // A  triangle, made with hard coded points.
+        float scale = 200.0f;
+        VertexGroup triangle = new VertexGroup(new float[]{
                 // x, y, z
-                // r, g, b, a
-                -0.5f, -0.25f, 0.0f,
-                0.0f, 1.0f, 1.0f, 1.0f,
+                -0.5f * scale, -0.25f * scale, 0.0f,
+                +0.5f * scale, -0.25f * scale, 0.0f,
+                +0.0f * scale, +0.56f * scale, 0.0f
+        });
+        triangle.shift(-200.0f, -100.0f)
+                .color((float) Math.random(), (float) Math.random(), (float) Math.random());
 
-                0.5f, -0.25f, 0.0f,
-                1.0f, 0.0f, 1.0f, 1.0f,
+        // A wide rectangle, made with easier-to-use method calls.
+        VertexGroup square = VertexGroup
+                // The 0.5f here means this is drawn above the other shapes, which default to 0.
+                .makeRect(100.0f, 500.0f, 0.5f)
+                .color(0.1f, 0.7f, 1.0f)
+                .shift(-150.0f, 150.0f);
 
-                0.0f, 0.559016994f, 0.0f,
-                1.0f, 1.0f, 0.0f, 1.0f
-        }));
-        shapes.get(1).shift(-200.0f, -100.0f);
-        // Scaling needs to come last!
-        shapes.get(1).scale(200.0f);
-
-        // A simple square.
-        shapes.add(new VertexGroup(new float[]{
-                -0.5f, -0.5f, 0.0f,
-                1.0f, 0.0f, 1.0f, 1.0f,
-
-                -0.5f, 0.5f, 0.0f,
-                1.0f, 0.0f, 1.0f, 1.0f,
-
-                0.5f, -0.5f, 0.0f,
-                1.0f, 0.0f, 1.0f, 1.0f,
-
-                0.5f, 0.5f, 0.0f,
-                1.0f, 0.0f, 1.0f, 1.0f,
-        }));
-        shapes.get(2).scale(100.0f);
+        shapes.add(triangle);
+        shapes.add(square);
     }
 
     private static int makeShader(String src, int type) {
@@ -133,29 +106,28 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
 
         // Shaders! Everyone's favorite programmable pipeline feature.
         String vertSrc =
-                  "uniform mat4 u_MVPMatrix;      \n" // A constant representing the combined model/view/projection matrix.
+                "uniform mat4 u_MVPMatrix;      \n"
+                        + "uniform vec3 u_Color;          \n"
 
-                + "attribute vec4 a_Position;     \n" // Per-vertex position information we will pass in.
-                + "attribute vec4 a_Color;        \n" // Per-vertex color information we will pass in.
+                        + "attribute vec4 a_Position;     \n"
 
-                + "varying vec4 v_Color;          \n" // This will be passed into the fragment shader.
+                        + "varying vec4 v_Color;          \n"
 
-                + "void main()                    \n" // The entry point for our vertex shader.
+                        + "void main()                    \n"
                 + "{                              \n"
-                + "   v_Color = a_Color;          \n" // Pass the color through to the fragment shader.
-                                                      // It will be interpolated across the triangle.
-                + "   gl_Position = u_MVPMatrix   \n" // gl_Position is a special variable used to store the final position.
-                + "               * a_Position;   \n" // Multiply the vertex by the matrix to get the final point in
-                + "}                              \n";// normalized screen coordinates.
+                        + "    v_Color = vec4(u_Color, 1.0); \n"
+                        + "    gl_Position = u_MVPMatrix  \n"
+                        + "               * a_Position;   \n"
+                        + "}                              \n";
 
         String fragSrc =
-                  "precision mediump float;       \n" // Set the default precision to medium. We don't need as high of a
-                                                      // precision in the fragment shader.
-                + "varying vec4 v_Color;          \n" // This is the color from the vertex shader interpolated across the
-                // triangle per fragment.
-                + "void main()                    \n" // The entry point for our fragment shader.
+                "precision mediump float;       \n"
+
+                        + "varying vec4 v_Color;          \n"
+
+                        + "void main()                    \n"
                 + "{                              \n"
-                + "   gl_FragColor = v_Color;     \n" // Pass the color directly through the pipeline.
+                        + "   gl_FragColor = v_Color;     \n"
                 + "}                              \n";
 
         int vert = makeShader(vertSrc, GLES20.GL_VERTEX_SHADER);
@@ -173,7 +145,6 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         // Bind the attributes too.
         // TODO: These positions (0 and 1) should probably not be hardcoded.
         GLES20.glBindAttribLocation(program, 0, "a_Position");
-        GLES20.glBindAttribLocation(program, 1, "a_Color");
 
         GLES20.glLinkProgram(program);
 
@@ -187,8 +158,9 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         }
 
         mMVPMatrixHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix");
+        mColorHandle = GLES20.glGetUniformLocation(program, "u_Color");
+
         mPositionHandle = GLES20.glGetAttribLocation(program, "a_Position");
-        mColorHandle = GLES20.glGetAttribLocation(program, "a_Color");
 
         // Everything worked! Tell OpenGL to use this 'program' to render.
         // TODO: We might want save this program, in case we ever want to switch them.
@@ -199,6 +171,18 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 glUnused, int width, int height) {
         windowWidth = width;
         windowHeight = height;
+
+        // We postpone loading the shapes because we want them to scale to the size of the screen,
+        // which we don't have until here.
+        if (mShapesNeedLoading) {
+            // A square which is sized at 30% of the smallest window dimension.
+            float side = 0.3f * Math.min(windowHeight, windowWidth);
+            shapes.add(VertexGroup
+                            .makeRect(side, side)
+                            .color((float) Math.random(), (float) Math.random(), (float) Math.random())
+            );
+            mShapesNeedLoading = false;
+        }
 
         // Whenever the view changes, update the matrices to avoid distorting our screen.
         // If we don't update them, the screen stretches from the old resolution to the new one.
@@ -221,7 +205,7 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         float dTime = time - mLastUpdate;
 
         // These are degrees per second. Or at least they should be.
-        float[] speeds = {201.0f, -37.0f, 371.0f};
+        float[] speeds = {45.0f, -31.0f, 67.0f};
         int idx = 0;
 
         for (VertexGroup tri : shapes) {
