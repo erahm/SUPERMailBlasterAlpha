@@ -1,10 +1,13 @@
 package com.returnpath.supermailblasteralpha;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-
+import android.view.View;
 
 public class LoadData extends ActionBarActivity {
 
@@ -34,5 +37,18 @@ public class LoadData extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void syncContextIO(View view) {
+        // Testing access to preferences.
+        // TODO: move somewhere else.
+        Log.d(this.getLocalClassName(), "htoth: in syncContextIO");
+        SharedPreferences s = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String syncEmail = s.getString("pref_email_address", "e@htoth.mailrp.net");
+        Log.d(this.getLocalClassName(), "htoth: emailaddress = " + syncEmail);
+
+//        String testUrl = "https://api.context.io/2.0/accounts/55ba5f4ddfc24787518b4567/contacts/hyrum.toth%40returnpath.com";
+        // TODO: pass in URL(s)
+        new ContextIOApi().execute();
     }
 }
