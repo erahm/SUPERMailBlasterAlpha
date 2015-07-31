@@ -51,13 +51,18 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
                 .color((float) Math.random(), (float) Math.random(), (float) Math.random());
 
         // A wide rectangle, made with easier-to-use method calls.
-        VertexGroup square = VertexGroup
+        VertexGroup rect = VertexGroup
                 // The 0.5f here means this is drawn above the other shapes, which default to 0.
-                .makeRect(100.0f, 500.0f, 0.5f)
+                .makeRect(500.0f, 100.0f, 0.5f)
                 .color(0.1f, 0.7f, 1.0f)
                 .center(-150.0f, 150.0f);
 
+        VertexGroup square = VertexGroup
+                .makeRect(50.0f, 50.0f, 0.8f)
+                .color((float) Math.random(), (float) Math.random(), (float) Math.random());
+
         shapes.add(triangle);
+        shapes.add(rect);
         shapes.add(square);
     }
 
@@ -208,8 +213,14 @@ public class GLES20Renderer implements GLSurfaceView.Renderer {
         float time = SystemClock.uptimeMillis() / 1000.0f;
         float dTime = time - mLastUpdate;
 
-        for (VertexGroup tri : shapes) {
-            tri.draw(mVPMatrix, mMVPMatrixHandle, mPositionHandle, mColorHandle);
+        float[] radii = {100.0f, 50.0f, 300.0f};
+        int[] direction = {-1, 1};
+
+        for (int i = 0; i < shapes.size(); i += 1) {
+            float r = radii[i % radii.length];
+            float d = direction[i % 2];
+            shapes.get(i).center(r * (float) Math.cos(d * time), r * (float) Math.sin(d * time));
+            shapes.get(i).draw(mVPMatrix, mMVPMatrixHandle, mPositionHandle, mColorHandle);
         }
 
         mLastUpdate = time;
