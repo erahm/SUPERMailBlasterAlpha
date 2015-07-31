@@ -93,6 +93,7 @@
     <orderEntry type="library" exported="" name="commons-codec-1.4" level="project" />
     <orderEntry type="library" exported="" name="support-v4-22.2.1" level="project" />
     <orderEntry type="library" exported="" name="gson-1.7.1" level="project" />
+    <orderEntry type="library" exported="" name="groovy-2.4.3-grooid" level="project" />
     <orderEntry type="library" exported="" name="okhttp-2.4.0" level="project" />
     <orderEntry type="library" exported="" name="scribe-1.2.1" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-22.2.1" level="project" />

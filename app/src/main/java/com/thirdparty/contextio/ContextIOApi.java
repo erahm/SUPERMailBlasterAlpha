@@ -156,10 +156,10 @@ public class ContextIOApi extends DefaultApi10a {
 	// region > build_baseurl, build_url
 //	@Programmatic
 	public String build_baseurl() {
-		String url = "http";
-		if (ssl) {
-			url = "https";
-		}
+		String url = "https"; //htoth
+//		if (ssl) {
+//			url = "https";
+//		}
 
 		return url + "://" + ENDPOINT + "/" + apiVersion + '/';
 	}

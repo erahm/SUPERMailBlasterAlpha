@@ -102,24 +102,30 @@ public class ContextIO_V20 extends ContextIOApi {
 
 	public ContextIOResponse doCall(String method, String accountId,
 			String action, Map<String, String> params) {
+        Log.d("one", "Request url : " + accountId);
 		String actionURL = action;
 		if (accountId != null && !accountId.equals("")) {
 			actionURL = "accounts/" + accountId + "/" + action;
 		}
 
 		String baseUrl = build_url(actionURL);
+        Log.d("two", "Request url : " + baseUrl);
 		OAuthService service = new ServiceBuilder()
 				.provider(ContextIOApi.class).apiKey(this.key)
 				.apiSecret(this.secret).build();
 
-		baseUrl = URLUtils.appendParametersToQueryString(baseUrl, params);
+        if (params != null) {
+            baseUrl = URLUtils.appendParametersToQueryString(baseUrl, params);
+        }
 
 		Log.d("asdf", "Request url : " + baseUrl);
 
 		OAuthRequest request = null;
 		if ("GET".equals(method)) {
+            Log.d("htoth007", "GET is true");
 			request = new OAuthRequest(Verb.GET, baseUrl);
 		} else if ("POST".equals(method)) {
+            Log.d("htoth007", "POST is true");
 			request = new OAuthRequest(Verb.POST, baseUrl);
 		}
 
@@ -127,6 +133,7 @@ public class ContextIO_V20 extends ContextIOApi {
 		service.signRequest(nullToken, request);
 
 		Response oauthResponse = request.send();
+        Log.d("htoth009", oauthResponse.toString());
 
 		lastResponse = new ContextIOResponse(oauthResponse.getCode(),
 				request.getHeaders(), oauthResponse.getHeaders(), oauthResponse);
