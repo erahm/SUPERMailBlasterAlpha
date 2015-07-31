@@ -105,7 +105,7 @@ public class VertexGroup {
     }
 
     public VertexGroup center(float x, float y) {
-        return shift(mCenterX - x, mCenterY - y);
+        return shift(x - mCenterX, y - mCenterY);
     }
 
     public float centerX() {
